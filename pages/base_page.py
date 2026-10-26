@@ -31,3 +31,30 @@ class BasePage:
     def get_element_text(self, locator):
         element = self.find_element_with_wait(locator)
         return element.text.strip()
+    
+    @allure.step("Выполнить JavaScript-скрипт в контексте браузера")
+    def execute_javascript(self, script, element):
+        # Если мы передаем "arguments[0].click();", заменяем это на полноценный клик через событие мыши MouseEvent.
+        # Это защитит тесты от ошибок "is not a function" на реактовых элементах Практикума!
+        if script == "arguments[0].click();":
+            click_script = (
+                "var evt = document.createEvent('MouseEvents');"
+                "evt.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);"
+                "arguments[0].dispatchEvent(evt);"
+            )
+            return self.driver.execute_script(click_script, element)
+            
+        # Для остальных скриптов (например, удаления атрибутов) оставляем стандартное выполнение
+        return self.driver.execute_script(script, element)
+    
+    @allure.step("Дождаться, пока элемент станет невидимым/исчезнет с экрана")
+    def wait_element_invisible(self, locator, timeout=15):
+        # Переносим WebDriverWait со страниц строго сюда
+        return WebDriverWait(self.driver, timeout).until(
+            EC.invisibility_of_element_located(locator)
+        )
+
+    @allure.step("Дождаться выполнения кастомного условия (лямбды)")
+    def wait_for_condition(self, condition_lambda, timeout=15):
+        # Универсальный метод для кастомных ожиданий (например, счетчиков)
+        return WebDriverWait(self.driver, timeout).until(condition_lambda)

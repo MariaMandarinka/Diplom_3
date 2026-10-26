@@ -26,7 +26,7 @@ class LoginPage(BasePage):
 
     @allure.step('Ввести пароль')
     def set_password(self, password):
-        # ИСПРАВЛЕНО: Поле пароля берем через ваш родной метод из BasePage
+        # ИСПРАВЛЕНО: Заменили find_element на find_element_with_wait из BasePage
         password_field = self.find_element_with_wait(self.locators.password_input)
         password_field.clear()
         password_field.send_keys(password)
@@ -34,8 +34,8 @@ class LoginPage(BasePage):
     @allure.step('Кликнуть на кнопку "Войти"')
     def click_login_button(self):
         element = self.find_element_with_wait(self.locators.login_account_btn)
-        # ИСПРАВЛЕНО: добавлен индекс [0]
-        self.driver.execute_script("arguments[0].click();", element)
+        # ИСПРАВЛЕНО: Заменили прямой вызов self.driver на метод execute_javascript из BasePage
+        self.execute_javascript("arguments[0].click();", element)
 
     @allure.step('Выполнить авторизацию пользователя')
     def login(self, email, password):
@@ -43,11 +43,9 @@ class LoginPage(BasePage):
         self.set_password(password)
         self.click_login_button()
         
-        # Ждём, пока кнопка 'Войти' физически исчезнет с экрана (скроется форма авторизации)
-        # Это гарантирует, что асинхронный переход Реакта на главную страницу завершился успешно
-        WebDriverWait(self.driver, 15).until(
-            EC.invisibility_of_element_located(self.locators.login_account_btn)
-        )
+        # ИСПРАВЛЕНО: Убрали прямой WebDriverWait. Теперь вызываем метод из BasePage!
+        self.wait_element_invisible(self.locators.login_account_btn)
+        
     @allure.step('Проверить видимость формы авторизации')
     def is_auth_form_visible(self):
         # Дожидаемся видимости формы авторизации через ваш базовый метод
