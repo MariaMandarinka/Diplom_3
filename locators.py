@@ -46,3 +46,9 @@ class OrderFeedLocators:
     number_order_in_job = (By.XPATH, ".//li[contains(@class, 'text_type_digits-default')]")
     order_info_window = (By.XPATH, ".//li[contains(@class, 'OrderHistory_listItem__2x95r')][1]")
     order_history = (By.XPATH, './/p[contains(@class, "text_type_digits-default")]')
+    
+    # ИСПРАВЛЕНО: Теперь динамический локатор вынесен строго в файл локаторов!
+    @staticmethod
+    def get_order_by_number_locator(normalized_number):
+        """Возвращает XPath-локатор для конкретного номера заказа в Ленте"""
+        return (By.XPATH, f".//*[contains(string(.), '{normalized_number}')]")
